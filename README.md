@@ -7,5 +7,6 @@
 - Jeudi 21/03 de 8h à 12h\
   *Avancement : TP2 pages 1 à 12 \
   **Pour la prochaine fois, revoir votre cours de statistiques descriptives !***
-- Jeudi 28/03 de 8h à 12h
+- Jeudi 28/03 de 8h à 12h \
+  *Avancement : TP2 pages 13 à 24*
 - Jeudi 11/04 de 8h à 12h
