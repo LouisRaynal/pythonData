@@ -10,3 +10,6 @@
 - Jeudi 28/03 de 8h à 12h \
   *Avancement : TP2 pages 13 à 24*
 - Jeudi 11/04 de 8h à 12h
+
+
+### TP noté la semaine du 22 avril
