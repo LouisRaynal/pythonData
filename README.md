@@ -12,5 +12,5 @@
 - Jeudi 11/04 de 8h à 12h
 
 
-### TP noté la semaine du 22 avril
+### TP noté du 22 avril
 Tous les documents utilisés lors des TP (polycopiés annotés, corrections, scripts Python personnels) seront autorisés ainsi que vos notes personnelles (fiches mémo, sommaires,...) et ressources disponibles à cette adresse
