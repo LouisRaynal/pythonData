@@ -254,3 +254,373 @@ df
 ### Suppression
 df.drop(columns = 'Produit_maj', inplace=True)
 
+
+# ------- 5. Exploration / Analyse du jeu de données
+
+# ------- Visualisation des données -----------
+
+### Tracer des graphs avec pandas et seaborn
+
+# Des courbes
+
+df.plot.line()
+
+df[['calories', 'potassium']].plot.line()
+
+df[['sucres','calories', 'potassium']].plot.line(subplots=True, sharex=True)
+
+df[['sucres','calories', 'potassium']].plot.line(figsize=(7,7), title='Ceci est mon titre')
+
+
+df.plot.line(x='sucres', y='calories')
+
+df.sort_values(by='sucres').plot.line(x='sucres', y='calories')
+
+
+# Diagramme en bâton
+
+df.type.value_counts()
+df.type.value_counts().plot.bar()
+
+### Exercices :
+df.fabricant.value_counts().plot.bar()
+
+### Bonus :
+df.étagère.value_counts().plot.bar()
+
+
+### Camemberts
+
+df.type.value_counts().plot.pie(ylabel='', autopct='%.1f')
+
+### Exercices :
+df.fabricant.value_counts().plot.pie(ylabel='', autopct='%.2f')
+
+### Bonus :
+df.étagère.value_counts().plot.pie(autopct='%.2f')
+
+
+### Histogramme
+
+# bins permet de partitionner en 10 classes
+df.calories.plot.hist(bins=10)
+
+df.calories.plot.hist(bins=10, density=True)
+
+
+### Exercices :
+df.note.plot.hist(bins=15, density=True)
+# On remarque que la distribution des notes se concentre aux alentours de 30 - 50
+# et qu'il y a une barre qui se détache avec une très haute note
+
+# Equivalent seaborn
+# sns.distplot(df.calories, bins=10)
+
+### Nuages de points
+
+df.plot.scatter(x='lipides', y='calories')
+
+
+### Exercices :
+# 1.
+df.plot.scatter(x='calories', y='note')
+# On constate  que lorsque les calories augmentent, la note diminue
+
+# 2.
+df.plot.scatter(x='sucres', y='note')
+# On constate  que lorsque les sucres augmentent, la note diminue
+
+
+# seaborn permet de tracer des pairplots
+
+df.columns
+
+sns.pairplot(df[['calories', 'protéines', 'lipides','sodium', 'note']])
+
+sns.pairplot(df[['fibres', 'glucides', 'sucres', 'potassium', 'note']])
+
+
+### Boxplots
+
+df.plot.box(column='note', rot=90) # rot permet de faire une rotation des libellés
+
+df.plot.box(column='note', by='étagère',rot=90)
+
+df.plot.box(column=['sucres','note'], by='étagère',rot=90)
+
+df.plot.box(column=['fibres','note'], by='étagère',rot=90)
+
+### Exercices :
+df.plot.box(column='note', by='fabricant',rot=90)
+df.plot.box(column=['fibres','note'], by='fabricant',rot=90)
+# Le fabricant Nabisco produit des céréales majoritairement avec haute teneur en fibres
+# (car son boxplot est compact est situé aux alentours de 3.5)
+# Ce fabricant a aussi les meilleurs notes
+
+
+#### ---------- 
+
+## Caractéristiques de la distribution centrale d'une variable
+
+# Moyenne
+df.sucres.mean()
+np.mean(df.sucres)
+
+# Médiane
+df.sucres.median()
+np.median(df.sucres)
+
+# Mode
+df.type.mode()
+
+## Caractéristiques de la variabilitié d'une variable
+
+# Variance
+df.sucres.var(ddof=0)
+np.var(df.sucres)
+# Note : il existe une version de la variance avec N-1 au lieu de N au dénominateur.
+# Par défaut pandas utilise N-1, lui préciser ddof=0 permet d'utiliser N.
+# Par défaut numpy utilise N
+
+# Ecart-type
+df.sucres.std(ddof=0)
+np.std(df.sucres)
+
+# Ecart inter-quartile
+# Calcul de quantiles (ici les 3 quartiles)
+df.sucres.quantile(q=[0.25,0.5,0.75])
+# Ecart inter-quartile :
+df.sucres.quantile(q=0.75) - df.sucres.quantile(q=0.25)
+
+# Etendue
+np.ptp(df.sucres)
+# vérification
+df.sucres.max() - df.sucres.min()
+
+
+# Describe
+df.select_dtypes(include=[np.number]).describe()
+
+df.select_dtypes(include=[object]).describe()    
+
+# Ou encore plus simple :
+df.describe(include=[np.number])
+
+df.describe(include=[object])
+
+#---------------------------------------------------
+
+### Exercices :
+    
+### Point sur la détection de valeurs aberrantes
+# Une règles de détection consiste à identifier les
+# points tombant en dehors d'un interval égal à
+# [Q1 - 1.5*IQR ; Q3 + 1.5*IQR]
+# Ce 1.5 provient du fait que pour une loi normale
+# les valeurs en dehors de +/-3 écart type
+# sont considérées comme outliers
+
+# On stocke dans une variable chaque élément permettant de calculer les bornes
+Q1 = df.note.quantile(q=0.25)
+Q3 = df.note.quantile(q=0.75)
+IQR = Q3 - Q1
+
+# On calcule les bornes
+borne_basse = Q1 - 1.5 * IQR
+borne_haute = Q3 + 1.5 * IQR
+
+# On compare df.note avec borne_basse et borne_haute
+condition1 = df.note < borne_basse
+condition2 = df.note > borne_haute
+
+# On combine les deux conditions en les séparant par l'opérateur logique "ou" : |
+conditionFinale = condition1 | condition2
+# les notes qui nous interessent sont inférieures à borne_basse
+# ou supérieures à bornes hautes
+# Autrement dit la note tombe en dehors de mon intervalle 
+
+conditionFinale # On constate qu'au moins la ligne avec indice 3 tombe en dehors des bornes
+
+# On finit par extraire de df (grâce à .loc)
+# les lignes vérifiant la conditionFinale
+# ainsi que toutes les colonnes (grâce aux ":")
+df.loc[ conditionFinale , : ]
+
+# Cela apparait déjà dans les boxplot
+# en effet les moustaches correspondent par défaut
+# aux bornes de cet intervalle
+df.note.plot.box()
+
+
+### --- Statistiques entre deux variables
+
+
+# On veut identifier les valeurs qui sont négatives parmis cette table numérique
+
+### lien entre deux variables quantitatives
+
+#-- covariance entre deux variables spécifiées
+df.calories.cov(df.note)
+# Une tendance de décroissante : si calories augmente, la note diminue
+
+# Vérifiez cette tendance graphiquement
+df.plot.scatter(x='calories', y='note')
+
+# ou bien entre toutes covariances entre colonnes numériques
+toto = df.cov(numeric_only = True)
+
+
+#-- Cefficient de correlation linéaire
+df.calories.corr(df.note)
+
+df.corrwith(df.note)
+
+df.corr(numeric_only = True)
+
+### Exercices :
+# La variable avec la plus forte correlation avec note est sucres : -0.762181
+df.plot.scatter(x='sucres', y='note')
+# On voit que la relation n'est pas complétement linéaire, mais se rapproche d'une droite bruitée
+# et lorsque sucres augmente, note diminue (d'où le signe négatif de la correlation)
+
+### -----------------------------------------------------------------
+
+
+df.groupby('fabricant')
+# permet de créer un objet de type GroupBy
+
+df.groupby('fabricant').mean(numeric_only=True)
+# Pour chaque modalité du groupe, c'est-à-dire fabricant,
+# la moyenne est calculée pour chaque colonne
+
+# La fonction size permet d'obtenir la taille de chaque groupe
+df.groupby('fabricant').size()
+
+# même selon plusieurs modalités
+df.groupby(['fabricant','type']).size()
+
+# On peut bien évidemment se limiter à certaines colonnes
+
+df.groupby('fabricant')[['calories','sucres','note']].mean()
+
+
+## Vous pouvez évidemment appliquer plus d'une fonction, à la fois, grâce
+## à la méthode agg et en vous limitant à certaines colonnes
+df.groupby('fabricant')[['calories','sucres']].agg([np.mean,np.median])
+
+# et donner les noms que vous voulez
+df.groupby('fabricant')[['calories','sucres']].agg([('moyenne',np.mean),('médiane',np.median)])
+
+
+
+
+## Fonction apply permet d'appliquer des fonctions sur des groupes
+
+# Permet de trier
+df.sort_values(by='note', ascending=False)[:3]
+
+def nPremiers(monDataFrame, n=3, colonne='note'):
+    return monDataFrame.sort_values(by=colonne, ascending=False)[:n]
+
+nPremiers(df, n=2, colonne='note')
+
+df.groupby('fabricant').apply(nPremiers, n=2, colonne='note')
+# Cela retourne pour chaque fabricant, les céréales avec les meilleurs notes
+
+### Exercices :
+df.groupby('étagère')[['calories', 'protéines', 'sucres', 'vitamines', 'potassium','note']].agg([np.mean, np.std])
+# On groupe selon les modalités d'étagère, et sur les colonnes calories...potassium, on calcule la moyenne et l'écart-type
+
+
+### Créer des groupes à partir de valeurs
+
+groupNotes = pd.cut(df.note, bins=[0,25,50,75,100], include_lowest=True)
+groupNotes # On obtient un objet de type category
+
+# On peut déterminer le nombre d'éléments dans chaque classe
+groupNotes.value_counts()
+
+# On peut aussi définir nos propres labels qui seront utilisés comme noms de classes
+groupNotes = pd.cut(df.note, bins=[0,25,50,75,100], include_lowest=True, labels=['mauvais','moyen','bon','excellent'])
+
+groupNotes.value_counts()
+
+df.groupby(groupNotes).mean(numeric_only=True)
+
+
+### Exercices :
+
+# 1.
+# Il est aussi possible de couper selon des quantiles
+groupNotesQuartiles = pd.qcut(df.note, 4) # ici selon les 3 quartiles
+
+# 2.
+groupNotesQuartiles.value_counts()
+
+# 3.
+### Pour revenir à nos groupby
+### on peut directement donner le résultat de la fonction cut
+df.groupby(groupNotesQuartiles)
+
+df.groupby(groupNotesQuartiles)[['sucres','calories','lipides']].agg([np.mean,np.median,np.std])
+
+
+### -----------------------------------------------------------------
+
+### Distribution d'une variable
+
+# en effectifs
+df['fabricant'].value_counts()
+
+# en fréquence
+df['fabricant'].value_counts(normalize=True)
+
+### Exercices :
+# 1.
+# On s'intéresse à la variable sucres
+df.sucres
+# Pour savoir les bornes min et max de nos intervalles, regardons
+# quelles sont les valeurs min et max de sucres
+df.sucres.min()
+df.sucres.max()
+
+# On crée des intervalles contenant 0 et 15
+groupSucres = pd.cut(df.sucres, bins=[0,5,10,15], include_lowest=True)
+
+# 2.
+# On calcule les effectifs dans chaque classe
+groupSucres.value_counts()
+# Ainsi que les fréquences
+groupSucres.value_counts(normalize=True)
+    
+
+
+### Distribution de plusieurs variables
+
+### Distribution jointe en termes d'effectifs
+
+tabEffFabType = pd.crosstab(df.fabricant, df.type, margins=True)
+tabEffFabType
+
+### Exercices :
+### Distribution jointe en termes de fréquences
+
+tabEffFabType = pd.crosstab(df.fabricant, df.type, margins=True, normalize=True)
+tabEffFabType
+
+
+### Exercices :
+### Distribution conditionnelles en termes d'effectives
+
+pd.crosstab(df.fabricant, df.type, margins=True)
+# pour la distribution du nombre de produits par fabricant sachant que type=chaudes
+# lire sur la colonne chaudes.
+
+# Idem pour fabricant sachant que type = froides
+
+pd.crosstab(df.fabricant, df.type, margins=True, normalize='columns')
+# on divide chaque colonne, par la somme des valeurs de la colonne, cela revient
+# à calculer la distribution en fréquence de fabricant conditonnelement au type
+
+pd.crosstab(df.fabricant, df.type, margins=True, normalize='index')
+# il s'agit ici de la distribution en fréquence, du type sachant le fabricant
