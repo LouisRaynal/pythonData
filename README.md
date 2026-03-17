@@ -1,9 +1,9 @@
 # Analyse de données avec Python
 
 ### Dates des TP :
-- Jeudi 12/03 de 8h à 12h
-<!--  *Avancement : TP1 hors sections 4.5 et exercices page 13 \ -->
-<!--  **Pour la prochaine fois, finir le TP et préparer les exercices page 13 + revoir votre cours de statistiques descriptives*** -->
+- Jeudi 12/03 de 8h à 12h \
+*Avancement : TP1 hors sections 4.5 et exercices page 13 \
+**Pour la prochaine fois, finir le TP et préparer les exercices page 13 + revoir votre cours de statistiques descriptives si non connu !***
 - Jeudi 19/03 de 8h à 12h
 <!--  *Avancement : TP2 pages 1 à 12 \ -->
 <!--  **Pour la prochaine fois, revoir votre cours de statistiques descriptives !*** -->
